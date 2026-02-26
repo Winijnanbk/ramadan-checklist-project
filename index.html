@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Ramadan Journey 🌙</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&family=Itim&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f7f3f0; /* สีพื้นหลังนวลๆ */
+            --post-it-color: #fffdf2; /* สีครีมอ่อนเหมือนกระดาษจริง */
+            --primary-color: #8da9ad;
+            --text-color: #555;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #5d7e83;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #999;
+            margin-bottom: 30px;
+        }
+
+        /* Container สำหรับ Post-it */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* สไตล์ Post-it แบบยาว (เหมือนของจริง) */
+        .post-it {
+            background: var(--post-it-color);
+            /* ปรับอัตราส่วนให้ยาวขึ้นเล็กน้อย (3:4) */
+            aspect-ratio: 3 / 4; 
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.08);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            font-family: 'Itim', cursive;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* เพิ่มขีดเส้นบรรทัดจางๆ ให้ดูเหมือนกระดาษเขียน */
+        .post-it::after {
+            content: "";
+            position: absolute;
+            top: 60%;
+            width: 70%;
+            height: 1px;
+            background: rgba(0,0,0,0.03);
+            box-shadow: 0 10px 0 rgba(0,0,0,0.03), 0 20px 0 rgba(0,0,0,0.03);
+        }
+
+        .post-it:hover {
+            transform: translateY(-5px) rotate(1deg);
+            box-shadow: 5px 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* เมื่อติ๊กแล้วจะหายไป */
+        .post-it.checked {
+            opacity: 0;
+            transform: scale(0.3) rotate(-10deg);
+            pointer-events: none;
+            display: none; 
+        }
+
+        .day-num {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #7da2a9;
+            margin-top: 10px;
+        }
+
+        .date-label {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        /* ส่วนแสดงผลด้านล่าง */
+        .status-bar {
+            margin-top: 50px;
+            padding: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            text-align: center;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        #counter {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            margin-top: 15px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #b8ccce;
+            border-radius: 10px;
+            transition: width 0.6s ease;
+        }
+
+        .btn-reset {
+            margin-top: 15px;
+            background: none;
+            border: 1px solid #ddd;
+            color: #999;
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Kanit';
+            font-size: 0.8rem;
+        }
+        
+        .btn-reset:hover {
+            background: #fff5f5;
+            color: #ff8a8a;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Ramadan 2025 🌙</h1>
+    <h3>By Winijnan</h3>
+    <p class="subtitle">18 ก.พ. - 19 มี.ค. | ค่อยๆ ก้าวไปด้วยกันนะ</p>
+
+    <div class="grid-container" id="grid">
+        </div>
+
+    <div class="status-bar">
+        <div id="counter">เริ่มต้นการเดินทาง...</div>
+        <div class="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <button class="btn-reset" onclick="resetData()">ล้างข้อมูลเพื่อเริ่มใหม่</button>
+    </div>
+
+    <script>
+        const startDate = new Date('2025-02-18');
+        const totalDays = 30; 
+        let completedDaysList = JSON.parse(localStorage.getItem('ramadanProgress')) || [];
+        
+        const grid = document.getElementById('grid');
+        const counterText = document.getElementById('counter');
+        const progressBar = document.getElementById('progress-bar');
+
+        function createChecklist() {
+            grid.innerHTML = '';
+            for (let i = 1; i <= totalDays; i++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + (i - 1));
+
+                const postIt = document.createElement('div');
+                postIt.className = 'post-it';
+                
+                if (completedDaysList.includes(i)) {
+                    postIt.classList.add('checked');
+                }
+
+                const dateString = currentDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+
+                postIt.innerHTML = `
+                    <div class="day-num">${i}</div>
+                    <div class="date-label">${dateString}</div>
+                `;
+
+                postIt.onclick = () => {
+                    if (!postIt.classList.contains('checked')) {
+                        // แจ้งเตือนข้อความให้กำลังใจ
+                        alert("อัลฮัมดุลิลลาฮฺ เก่งมากที่อดทนผ่านไปได้ ❤️");
+                        
+                        postIt.classList.add('checked');
+                        completedDaysList.push(i);
+                        localStorage.setItem('ramadanProgress', JSON.stringify(completedDaysList));
+                        
+                        // รอให้ animation หายไปนิดนึงค่อยอัปเดต status
+                        setTimeout(updateStatus, 300);
+                    }
+                };
+
+                grid.appendChild(postIt);
+            }
+            updateStatus();
+        }
+
+        function updateStatus() {
+            const count = completedDaysList.length;
+            if (count === 0) {
+                counterText.innerText = "วันนี้พร้อมสำหรับการถือศีลอดหรือยัง?";
+            } else if (count === totalDays) {
+                counterText.innerText = "อีดิ้ลฟิตรีมูบาร็อก! ทำสำเร็จแล้ว 🌙✨";
+            } else {
+                counterText.innerText = `ผ่านไปแล้ว ${count} วัน.. สู้ๆ นะ!`;
+            }
+            
+            const percent = (count / totalDays) * 100;
+            progressBar.style.width = percent + '%';
+        }
+
+        function resetData() {
+            if(confirm("คุณต้องการล้างข้อมูลที่บันทึกไว้ทั้งหมดใช่ไหม?")) {
+                localStorage.removeItem('ramadanProgress');
+                completedDaysList = [];
+                createChecklist();
+            }
+        }
+
+        createChecklist();
+    </script>
+</body>
+</html>
