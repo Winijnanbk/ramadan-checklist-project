@@ -30,6 +30,7 @@
         }
 
         h1 { color: #5d7e83; margin: 0; font-size: 1.4rem; }
+        h5 { margin: 5px 0; color: #aaa; font-weight: 300; }
 
         .progress-container {
             width: 100%; background-color: #f0f0f0; border-radius: 10px;
@@ -68,7 +69,6 @@
         .missed .day-num { color: #d9534f; }
         .date-label { font-size: 0.75rem; color: #aaa; }
         
-        /* สัญลักษณ์อิบาดะห์บนใบ */
         .ibadah-icons { font-size: 0.65rem; color: #666; margin-top: 5px; text-align: center; }
         .reason-tag { font-size: 0.6rem; color: #d9534f; margin-top: 4px; text-align: center; }
 
@@ -85,6 +85,21 @@
         .extra-input-group label { font-size: 0.8rem; display: block; margin-bottom: 5px; }
         input[type="text"], input[type="number"] { width: 95%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: 'Kanit'; margin-bottom: 10px; }
         .checkbox-group { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px; }
+
+        /* เพิ่มปุ่มปิด X ใน Modal */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .close-btn {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #ccc;
+            line-height: 1;
+        }
+        .close-btn:hover { color: #888; }
     </style>
 </head>
 <body>
@@ -105,9 +120,12 @@
 
     <div class="grid-container" id="grid"></div>
 
-    <div id="choiceModal" class="modal">
+   <div id="choiceModal" class="modal">
         <div class="modal-content">
-            <h3 id="modalTitle">วันที่...</h3>
+            <div class="modal-header">
+                <h3 id="modalTitle" style="margin:0;">วันที่...</h3>
+                <span class="close-btn" onclick="closeModal()">&times;</span>
+            </div>
             
             <button class="action-btn btn-yes" onclick="showExtraInputs()">✅ ถือศีลอด</button>
             
@@ -131,6 +149,7 @@
     </div>
 
     <script>
+        // ตั้งค่าปีเป็น 2026 (รอมฎอนวันแรกประมาณ 18 ก.พ.)
         const startDate = new Date('2026-02-18');
         let ramadanData = JSON.parse(localStorage.getItem('ramadanDataV6')) || [];
         let currentSelectingDay = null;
@@ -185,14 +204,31 @@
             localStorage.setItem('ramadanDataV6', JSON.stringify(ramadanData));
         }
 
+
+        function closeModal() {
+            document.getElementById('choiceModal').style.display = 'none';
+        }
+
+        // เพิ่มเงื่อนไข: ถ้ากดนอกเมนู (พื้นที่สีเทา) ให้ปิด Popup
+        window.onclick = function(event) {
+            const modal = document.getElementById('choiceModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
         function handlePostItClick(item, postItDate) {
             const today = new Date();
-            today.setHours(0,0,0,0);
-            if (postItDate > today) {
+            // สร้างวันที่เปรียบเทียบเฉพาะ ปี-เดือน-วัน (ตัดเวลาทิ้ง)
+            const checkToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const checkPostIt = new Date(postItDate.getFullYear(), postItDate.getMonth(), postItDate.getDate());
+
+            // 1. ดักวันที่: ห้ามกดล่วงหน้า
+            if (checkPostIt > checkToday) {
                 alert("อดใจรอนิดนึงจ้า ยังไม่ถึงวันที่ " + item.day + " เลย ❤️");
                 return;
             }
 
+            // 2. ระบบ Toggle: ถ้ากดซ้ำให้ล้างค่า (Undo)
             if (item.status !== 'pending') {
                 if (confirm(`ยกเลิกการบันทึกวันที่ ${item.day} ใช่ไหม?`)) {
                     const idx = ramadanData.findIndex(d => d.day === item.day);
@@ -254,7 +290,7 @@
         }
 
         function resetData() {
-            if(confirm("ล้างข้อมูลทั้งหมด?")) {
+            if(confirm("ล้างข้อมูลทั้งหมด? ข้อมูลที่บันทึกไว้ในเครื่องจะหายไป")) {
                 localStorage.removeItem('ramadanDataV6');
                 ramadanData = [];
                 init();
