@@ -1,250 +1,3 @@
-<!-- <!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Ramadan Journey 🌙</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&family=Itim&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-color: #f7f3f0; /* สีพื้นหลังนวลๆ */
-            --post-it-color: #fffdf2; /* สีครีมอ่อนเหมือนกระดาษจริง */
-            --primary-color: #8da9ad;
-            --text-color: #555;
-        }
-
-        body {
-            font-family: 'Kanit', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 {
-            color: #5d7e83;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-
-        .subtitle {
-            font-size: 1rem;
-            color: #999;
-            margin-bottom: 30px;
-        }
-
-        /* Container สำหรับ Post-it */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 900px;
-        }
-
-        /* สไตล์ Post-it แบบยาว (เหมือนของจริง) */
-        .post-it {
-            background: var(--post-it-color);
-            /* ปรับอัตราส่วนให้ยาวขึ้นเล็กน้อย (3:4) */
-            aspect-ratio: 3 / 4; 
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            box-shadow: 2px 4px 10px rgba(0,0,0,0.08);
-            border-radius: 2px;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            font-family: 'Itim', cursive;
-            border-bottom: 1px solid #eee;
-        }
-
-        /* เพิ่มขีดเส้นบรรทัดจางๆ ให้ดูเหมือนกระดาษเขียน */
-        .post-it::after {
-            content: "";
-            position: absolute;
-            top: 60%;
-            width: 70%;
-            height: 1px;
-            background: rgba(0,0,0,0.03);
-            box-shadow: 0 10px 0 rgba(0,0,0,0.03), 0 20px 0 rgba(0,0,0,0.03);
-        }
-
-        .post-it:hover {
-            transform: translateY(-5px) rotate(1deg);
-            box-shadow: 5px 10px 20px rgba(0,0,0,0.1);
-        }
-
-        /* เมื่อติ๊กแล้วจะหายไป */
-        .post-it.checked {
-            opacity: 0;
-            transform: scale(0.3) rotate(-10deg);
-            pointer-events: none;
-            display: none; 
-        }
-
-        .day-num {
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #7da2a9;
-            margin-top: 10px;
-        }
-
-        .date-label {
-            font-size: 0.85rem;
-            color: #aaa;
-            margin-top: 5px;
-        }
-
-        /* ส่วนแสดงผลด้านล่าง */
-        .status-bar {
-            margin-top: 50px;
-            padding: 25px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-            text-align: center;
-            width: 100%;
-            max-width: 450px;
-        }
-
-        #counter {
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-
-        .progress-container {
-            width: 100%;
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            margin-top: 15px;
-            height: 8px;
-            overflow: hidden;
-        }
-
-        #progress-bar {
-            width: 0%;
-            height: 100%;
-            background-color: #b8ccce;
-            border-radius: 10px;
-            transition: width 0.6s ease;
-        }
-
-        .btn-reset {
-            margin-top: 15px;
-            background: none;
-            border: 1px solid #ddd;
-            color: #999;
-            padding: 5px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-family: 'Kanit';
-            font-size: 0.8rem;
-        }
-        
-        .btn-reset:hover {
-            background: #fff5f5;
-            color: #ff8a8a;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>Ramadan 2025 🌙</h1>
-    <h3>By Winijnan</h3>
-    <p class="subtitle">18 ก.พ. - 19 มี.ค. | ค่อยๆ ก้าวไปด้วยกันนะ</p>
-
-    <div class="grid-container" id="grid">
-        </div>
-
-    <div class="status-bar">
-        <div id="counter">เริ่มต้นการเดินทาง...</div>
-        <div class="progress-container">
-            <div id="progress-bar"></div>
-        </div>
-        <button class="btn-reset" onclick="resetData()">ล้างข้อมูลเพื่อเริ่มใหม่</button>
-    </div>
-
-    <script>
-        const startDate = new Date('2025-02-18');
-        const totalDays = 30; 
-        let completedDaysList = JSON.parse(localStorage.getItem('ramadanProgress')) || [];
-        
-        const grid = document.getElementById('grid');
-        const counterText = document.getElementById('counter');
-        const progressBar = document.getElementById('progress-bar');
-
-        function createChecklist() {
-            grid.innerHTML = '';
-            for (let i = 1; i <= totalDays; i++) {
-                const currentDate = new Date(startDate);
-                currentDate.setDate(startDate.getDate() + (i - 1));
-
-                const postIt = document.createElement('div');
-                postIt.className = 'post-it';
-                
-                if (completedDaysList.includes(i)) {
-                    postIt.classList.add('checked');
-                }
-
-                const dateString = currentDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
-
-                postIt.innerHTML = `
-                    <div class="day-num">${i}</div>
-                    <div class="date-label">${dateString}</div>
-                `;
-
-                postIt.onclick = () => {
-                    if (!postIt.classList.contains('checked')) {
-                        // แจ้งเตือนข้อความให้กำลังใจ
-                        alert("อัลฮัมดุลิลลาฮฺ เก่งมากที่อดทนผ่านไปได้ ❤️");
-                        
-                        postIt.classList.add('checked');
-                        completedDaysList.push(i);
-                        localStorage.setItem('ramadanProgress', JSON.stringify(completedDaysList));
-                        
-                        // รอให้ animation หายไปนิดนึงค่อยอัปเดต status
-                        setTimeout(updateStatus, 300);
-                    }
-                };
-
-                grid.appendChild(postIt);
-            }
-            updateStatus();
-        }
-
-        function updateStatus() {
-            const count = completedDaysList.length;
-            if (count === 0) {
-                counterText.innerText = "วันนี้พร้อมสำหรับการถือศีลอดหรือยัง?";
-            } else if (count === totalDays) {
-                counterText.innerText = "อีดิ้ลฟิตรีมูบาร็อก! ทำสำเร็จแล้ว 🌙✨";
-            } else {
-                counterText.innerText = `ผ่านไปแล้ว ${count} วัน.. สู้ๆ นะ!`;
-            }
-            
-            const percent = (count / totalDays) * 100;
-            progressBar.style.width = percent + '%';
-        }
-
-        function resetData() {
-            if(confirm("คุณต้องการล้างข้อมูลที่บันทึกไว้ทั้งหมดใช่ไหม?")) {
-                localStorage.removeItem('ramadanProgress');
-                completedDaysList = [];
-                createChecklist();
-            }
-        }
-
-        createChecklist();
-    </script>
-</body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -252,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Ramadan Journey 🌙</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500&family=Itim&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --bg-color: #f7f3f0;
             --post-it-color: #fffdf2;
-            --post-it-missed: #ffcfcf;
-            --primary-color: #8da9ad;
+            --post-it-success: #dfffe2;
+            --post-it-missed: #ffe2e2;
             --text-color: #555;
         }
 
@@ -265,230 +19,227 @@
             font-family: 'Kanit', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0; padding: 20px;
+            margin: 0; padding: 10px;
             display: flex; flex-direction: column; align-items: center;
         }
 
-        h1 { color: #5d7e83; margin-bottom: 5px; font-weight: 500; }
-        .subtitle { font-size: 0.9rem; color: #999; margin-bottom: 30px; text-align: center; }
+        .header-section {
+            width: 90%; max-width: 450px; background: white; padding: 20px;
+            border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center; margin-bottom: 20px; position: sticky; top: 10px; z-index: 10;
+        }
+
+        h1 { color: #5d7e83; margin: 0; font-size: 1.4rem; }
+
+        .progress-container {
+            width: 100%; background-color: #f0f0f0; border-radius: 10px;
+            height: 14px; margin: 15px 0; overflow: hidden;
+        }
+        #progress-bar {
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, #7fc384, #4caf50);
+            transition: width 0.5s ease;
+        }
+
+        .flex-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .modal-btn { flex: 1; padding: 8px; border-radius: 10px; border: none; cursor: pointer; font-family: 'Kanit'; font-size: 0.75rem; }
+        .btn-add { background: #eee; }
+        .btn-remove { background: #ffecec; color: #d9534f; }
+        .btn-reset { background: #fff; border: 1px solid #eee; color: #ccc; width: 100%; margin-top: 5px; }
 
         .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-            gap: 15px; width: 100%; max-width: 900px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px; width: 100%; max-width: 900px; padding-bottom: 40px;
         }
 
         .post-it {
-            background: var(--post-it-color);
-            aspect-ratio: 3 / 4; 
-            padding: 15px;
-            display: flex; flex-direction: column; justify-content: flex-start; align-items: center;
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.05);
-            border-radius: 2px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Itim', cursive;
+            background: var(--post-it-color); aspect-ratio: 3 / 4; padding: 10px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.05); border-radius: 2px;
+            cursor: pointer; font-family: 'Itim', cursive; transition: all 0.3s ease;
             position: relative;
         }
 
-        .post-it:hover { transform: translateY(-3px) rotate(1deg); }
-        .post-it.missed { background-color: var(--post-it-missed); }
-        .post-it.checked { opacity: 0; transform: scale(0.5); pointer-events: none; display: none; }
+        /* สถานะบวชแล้ว/ไม่ได้บวช จะจางลง */
+        .post-it.success { background-color: var(--post-it-success); opacity: 0.5; transform: scale(0.95); box-shadow: none; }
+        .post-it.missed { background-color: var(--post-it-missed); opacity: 0.5; transform: scale(0.95); box-shadow: none; }
 
-        .day-num { font-size: 1.5rem; font-weight: bold; color: #7da2a9; margin-top: 5px; }
+        .day-num { font-size: 1.4rem; font-weight: bold; color: #7da2a9; }
+        .success .day-num { color: #4caf50; }
         .missed .day-num { color: #d9534f; }
-        .date-label { font-size: 0.8rem; color: #aaa; }
-        .reason-tag { font-size: 0.7rem; color: #d9534f; margin-top: 5px; text-align: center; }
-
-        .status-bar {
-            margin-top: 40px; padding: 20px;
-            background: white; border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
-            text-align: center; width: 100%; max-width: 450px;
-        }
-
-        .qada-count { color: #d9534f; font-weight: bold; margin-top: 10px; }
+        .date-label { font-size: 0.75rem; color: #aaa; }
+        .reason-tag { font-size: 0.6rem; color: #d9534f; margin-top: 4px; text-align: center; line-height: 1; }
 
         .modal {
-            display: none; position: fixed; z-index: 100;
-            left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.4);
-            justify-content: center; align-items: center;
+            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center;
         }
-        .modal-content {
-            background: white; padding: 25px; border-radius: 20px;
-            width: 85%; max-width: 350px; text-align: center;
-        }
-        .modal-btn {
-            padding: 10px; margin: 5px 0;
-            border-radius: 10px; border: none; cursor: pointer;
-            font-family: 'Kanit'; font-size: 1rem;
-        }
-        .btn-success { width: 100%; background: #dfffe2; color: #2d5a27; }
-        .btn-danger { width: 100%; background: #ffe2e2; color: #a33a3a; }
-        input[type="text"] {
-            width: 90%; padding: 8px; margin-top: 10px;
-            border: 1px solid #ddd; border-radius: 5px; font-family: 'Kanit';
-        }
-        .flex-buttons { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
+        .action-btn { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: none; font-family: 'Kanit'; cursor: pointer; }
+        .btn-yes { background: #dfffe2; color: #2d5a27; }
+        .btn-no { background: #ffe2e2; color: #a33a3a; }
+        input[type="text"] { width: 90%; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Kanit'; }
     </style>
 </head>
 <body>
 
-    <h1>Ramadan 2025 🌙</h1>
-    <h4>By Winijnan</h4>
-    <p class="subtitle">18 ก.พ. - สิ้นสุดตามการดูดวงจันทร์<br>(บันทึกการถือศีลอดและวันที่ต้องบวชชด)</p>
-
-    <div class="grid-container" id="grid"></div>
-
-    <div class="status-bar">
-        <div id="counter">เริ่มต้นการเดินทาง...</div>
-        <div class="qada-count" id="qada-text">จำนวนวันที่ต้องบวชชด: 0 วัน</div>
+    <div class="header-section">
+        <h1>Ramadan 2025 🌙</h1>
+        <h5>By Winijnan</h5>
+        <div class="progress-container"><div id="progress-bar"></div></div>
+        <div style="font-size: 0.85rem; margin-bottom: 10px;">
+            <span id="counter">สำเร็จ 0 วัน</span> | <span id="qada-text" style="color:#d9534f;">บวชชด: 0</span>
+        </div>
         <div class="flex-buttons">
-            <button class="modal-btn" style="background:#eee; font-size:0.8rem; flex: 1;" onclick="addExtraDay()">+ เพิ่มวัน (30+)</button>
-            <button id="btn-remove" class="modal-btn" style="background:#ffecec; color:#d9534f; font-size:0.8rem; flex: 1; display:none;" onclick="removeExtraDay()">- ลบวันล่าสุด</button>
-            <button class="modal-btn" style="background:#fff; border: 1px solid #eee; color:#ccc; font-size:0.8rem; width: 100%;" onclick="resetData()">รีเซ็ตทั้งหมด</button>
+            <button class="modal-btn btn-add" onclick="addExtraDay()">+ เพิ่มวัน (31)</button>
+            <button id="btn-remove" class="modal-btn btn-remove" style="display:none;" onclick="removeExtraDay()">- ลบวันล่าสุด</button>
+            <button class="modal-btn btn-reset" onclick="resetData()">รีเซ็ตทั้งหมด</button>
         </div>
     </div>
+
+    <div class="grid-container" id="grid"></div>
 
     <div id="choiceModal" class="modal">
         <div class="modal-content">
             <h3 id="modalTitle">วันที่...</h3>
-            <button class="modal-btn btn-success" onclick="confirmFasting(true)">✅ ถือศีลอด</button>
-            <button class="modal-btn btn-danger" onclick="confirmFasting(false)">❌ ไม่ได้ถือศีลอด</button>
+            <button class="action-btn btn-yes" onclick="confirmFasting(true)">✅ ถือศีลอด</button>
+            <button class="action-btn btn-no" onclick="confirmFasting(false)">❌ ไม่ได้ถือศีลอด</button>
             <div id="reasonInput" style="display:none;">
-                <input type="text" id="reasonText" placeholder="เหตุผล (ประจำเดือน, ป่วย, ฯลฯ)">
-                <button class="modal-btn" style="background:#444; color:white; margin-top:10px; width:100%;" onclick="saveMissed()">ตกลง</button>
+                <input type="text" id="reasonText" placeholder="เหตุผล (เช่น ประจำเดือน, ป่วย)">
+                <button class="action-btn" style="background:#5d7e83; color:white; margin-top:10px;" onclick="saveMissed()">บันทึก</button>
             </div>
         </div>
     </div>
 
     <script>
-    let startDate = new Date('2025-02-18');
-    // ดึงข้อมูลจาก LocalStorage
-    let ramadanData = JSON.parse(localStorage.getItem('ramadanDataV2')) || [];
-    let currentSelectingDay = null;
+        const startDate = new Date('2025-02-18');
+        let ramadanData = JSON.parse(localStorage.getItem('ramadanDataV5')) || [];
+        let currentSelectingDay = null;
 
-    const grid = document.getElementById('grid');
-    const qadaText = document.getElementById('qada-text');
-    const modal = document.getElementById('choiceModal');
-    const btnRemove = document.getElementById('btn-remove');
-
-    function init() {
-        // ปรับให้เริ่มต้นที่ 29 วันพอดี (ถ้ายังไม่มีข้อมูลในเครื่อง)
-        if (ramadanData.length === 0) {
-            for(let i=1; i<=29; i++) {
-                ramadanData.push({ day: i, status: 'pending', reason: '' });
+        function init() {
+            if (ramadanData.length === 0) {
+                for(let i=1; i<=30; i++) ramadanData.push({ day: i, status: 'pending', reason: '' });
             }
+            render();
         }
-        render();
-        updateRemoveButtonVisibility();
-    }
 
-    function render() {
-        grid.innerHTML = '';
-        let qadaCount = 0;
-        let finishedCount = 0;
+        function render() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            let qadaCount = 0;
+            let finishedCount = 0;
 
-        ramadanData.forEach(item => {
-            const postIt = document.createElement('div');
-            postIt.className = 'post-it';
+            ramadanData.forEach(item => {
+                const postIt = document.createElement('div');
+                postIt.className = 'post-it ' + (item.status !== 'pending' ? item.status : '');
+                
+                const curDate = new Date(startDate);
+                curDate.setDate(startDate.getDate() + (item.day - 1));
+                const dateStr = curDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+
+                postIt.innerHTML = `<div class="day-num">${item.day}</div><div class="date-label">${dateStr}</div>`;
+                
+                if (item.status === 'missed') {
+                    postIt.innerHTML += `<div class="reason-tag">${item.reason || 'ไม่ได้บวช'}</div>`;
+                    qadaCount++;
+                } else if (item.status === 'success') {
+                    finishedCount++;
+                }
+
+                postIt.onclick = () => handlePostItClick(item, curDate);
+                grid.appendChild(postIt);
+            });
+
+            document.getElementById('counter').innerText = `สำเร็จ ${finishedCount} วัน`;
+            document.getElementById('qada-text').innerText = `บวชชด: ${qadaCount} วัน`;
             
-            const currentDate = new Date(startDate);
-            currentDate.setDate(startDate.getDate() + (item.day - 1));
-            const dateString = currentDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+            const total = ramadanData.length;
+            const progress = ((finishedCount + qadaCount) / total) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
 
-            if (item.status === 'success') {
-                postIt.classList.add('checked');
-                finishedCount++;
-            } else if (item.status === 'missed') {
-                postIt.classList.add('missed');
-                postIt.innerHTML = `<div class="day-num">${item.day}</div><div class="date-label">${dateString}</div><div class="reason-tag">${item.reason || 'ไม่ได้บวช'}</div>`;
-                qadaCount++;
-            } else {
-                postIt.innerHTML = `<div class="day-num">${item.day}</div><div class="date-label">${dateString}</div>`;
+            if (finishedCount + qadaCount === total && total > 0) launchCelebrate();
+
+            document.getElementById('btn-remove').style.display = total > 30 ? 'block' : 'none';
+            localStorage.setItem('ramadanDataV5', JSON.stringify(ramadanData));
+        }
+
+        function handlePostItClick(item, postItDate) {
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const checkDate = new Date(postItDate);
+            checkDate.setHours(0,0,0,0);
+
+            // 1. ดักวันที่: ห้ามกดล่วงหน้า
+            if (checkDate > today) {
+                alert("อดใจรอนิดนึงจ้า ยังไม่ถึงวันที่ " + item.day + " เลย ❤️");
+                return;
             }
 
-            postIt.onclick = () => openModal(item.day);
-            grid.appendChild(postIt);
-        });
+            // 2. ระบบ Toggle: ถ้ามีสถานะอยู่แล้ว ให้ถามเพื่อล้างค่า (Undo)
+            if (item.status !== 'pending') {
+                if (confirm(`คุณต้องการยกเลิกการบันทึกของวันที่ ${item.day} ใช่ไหม?`)) {
+                    const idx = ramadanData.findIndex(d => d.day === item.day);
+                    ramadanData[idx].status = 'pending';
+                    ramadanData[idx].reason = '';
+                    render();
+                }
+                return;
+            }
 
-        document.getElementById('counter').innerText = `สำเร็จแล้ว ${finishedCount} วัน`;
-        qadaText.innerText = `จำนวนวันที่ต้องบวชชด: ${qadaCount} วัน`;
-        localStorage.setItem('ramadanDataV2', JSON.stringify(ramadanData));
-    }
-
-    function updateRemoveButtonVisibility() {
-        // ปุ่มลบจะโชว์เมื่อมีวันมากกว่า 29 วันเท่านั้น
-        if (ramadanData.length > 29) {
-            btnRemove.style.display = 'block';
-        } else {
-            btnRemove.style.display = 'none';
+            // 3. ถ้ายังไม่มีสถานะ ให้เปิด Modal เลือก
+            currentSelectingDay = item.day;
+            document.getElementById('modalTitle').innerText = `วันที่ ${item.day}`;
+            document.getElementById('reasonInput').style.display = 'none';
+            document.getElementById('choiceModal').style.display = 'flex';
         }
-    }
 
-    function addExtraDay() {
-        // ป้องกันไม่ให้เพิ่มเกิน 31 วัน (ตามหลักศาสนาเดือนอาหรับมีไม่เกิน 30 แต่มักเผื่อไว้)
-        if (ramadanData.length >= 31) {
-            alert("เดือนรอมฎอนไม่น่าจะเกินนี้แล้วนะครับ");
-            return;
+        function confirmFasting(isSuccess) {
+            const idx = ramadanData.findIndex(d => d.day === currentSelectingDay);
+            if (isSuccess) {
+                alert("อัลฮัมดุลิลลาฮฺ เก่งมากที่อดทนผ่านไปได้ ❤️");
+                ramadanData[idx].status = 'success';
+                document.getElementById('choiceModal').style.display = 'none';
+                render();
+            } else {
+                document.getElementById('reasonInput').style.display = 'block';
+            }
         }
-        const newDayNum = ramadanData.length + 1;
-        ramadanData.push({ day: newDayNum, status: 'pending', reason: '' });
-        render();
-        updateRemoveButtonVisibility();
-    }
 
-    function removeExtraDay() {
-        // ลบได้เฉพาะวันที่มากกว่า 29
-        if (ramadanData.length > 29) {
-            ramadanData.pop();
+        function saveMissed() {
+            const idx = ramadanData.findIndex(d => d.day === currentSelectingDay);
+            ramadanData[idx].status = 'missed';
+            ramadanData[idx].reason = document.getElementById('reasonText').value || 'ไม่ได้บวช';
+            document.getElementById('reasonText').value = '';
+            document.getElementById('choiceModal').style.display = 'none';
             render();
-            updateRemoveButtonVisibility();
         }
-    }
 
-    // ส่วนของ Modal และ Reset คงเดิมตามโค้ดก่อนหน้า...
-    function openModal(day) {
-        currentSelectingDay = day;
-        document.getElementById('modalTitle').innerText = `วันที่ ${day}`;
-        document.getElementById('reasonInput').style.display = 'none';
-        modal.style.display = 'flex';
-    }
-
-    function confirmFasting(isSuccess) {
-        const index = ramadanData.findIndex(d => d.day === currentSelectingDay);
-        if (isSuccess) {
-            alert("อัลฮัมดุลิลลาฮฺ เก่งมากที่อดทนผ่านไปได้ ❤️");
-            ramadanData[index].status = 'success';
-            modal.style.display = 'none';
+        function addExtraDay() {
+            ramadanData.push({ day: ramadanData.length + 1, status: 'pending', reason: '' });
             render();
-        } else {
-            document.getElementById('reasonInput').style.display = 'block';
         }
-    }
 
-    function saveMissed() {
-        const index = ramadanData.findIndex(d => d.day === currentSelectingDay);
-        const reason = document.getElementById('reasonText').value;
-        ramadanData[index].status = 'missed';
-        ramadanData[index].reason = reason;
-        document.getElementById('reasonText').value = '';
-        modal.style.display = 'none';
-        render();
-    }
-
-    function resetData() {
-        if(confirm("ต้องการล้างข้อมูลทั้งหมด?")) {
-            localStorage.removeItem('ramadanDataV2');
-            ramadanData = [];
-            init();
+        function removeExtraDay() {
+            if (ramadanData.length > 30) {
+                ramadanData.pop();
+                render();
+            }
         }
-    }
 
-    window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; }
-    
-    init();
-</script>
+        function resetData() {
+            if(confirm("ล้างข้อมูลทั้งหมด?")) {
+                localStorage.removeItem('ramadanDataV5');
+                ramadanData = [];
+                init();
+            }
+        }
+
+        function launchCelebrate() {
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#4caf50', '#fffdf2', '#8da9ad'] });
+        }
+
+        window.onclick = (e) => { if (e.target == document.getElementById('choiceModal')) document.getElementById('choiceModal').style.display = "none"; }
+        init();
+    </script>
 </body>
 </html>
