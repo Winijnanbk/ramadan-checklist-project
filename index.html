@@ -60,32 +60,37 @@
             position: relative;
         }
 
-        /* สถานะบวชแล้ว/ไม่ได้บวช จะจางลง */
-        .post-it.success { background-color: var(--post-it-success); opacity: 0.5; transform: scale(0.95); box-shadow: none; }
-        .post-it.missed { background-color: var(--post-it-missed); opacity: 0.5; transform: scale(0.95); box-shadow: none; }
+        .post-it.success { background-color: var(--post-it-success); opacity: 0.6; transform: scale(0.95); box-shadow: none; }
+        .post-it.missed { background-color: var(--post-it-missed); opacity: 0.6; transform: scale(0.95); box-shadow: none; }
 
         .day-num { font-size: 1.4rem; font-weight: bold; color: #7da2a9; }
         .success .day-num { color: #4caf50; }
         .missed .day-num { color: #d9534f; }
         .date-label { font-size: 0.75rem; color: #aaa; }
-        .reason-tag { font-size: 0.6rem; color: #d9534f; margin-top: 4px; text-align: center; line-height: 1; }
+        
+        /* สัญลักษณ์อิบาดะห์บนใบ */
+        .ibadah-icons { font-size: 0.65rem; color: #666; margin-top: 5px; text-align: center; }
+        .reason-tag { font-size: 0.6rem; color: #d9534f; margin-top: 4px; text-align: center; }
 
         .modal {
             display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.4); justify-content: center; align-items: center;
         }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
         .action-btn { width: 100%; padding: 12px; margin: 5px 0; border-radius: 10px; border: none; font-family: 'Kanit'; cursor: pointer; }
         .btn-yes { background: #dfffe2; color: #2d5a27; }
         .btn-no { background: #ffe2e2; color: #a33a3a; }
-        input[type="text"] { width: 90%; padding: 10px; margin-top: 10px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Kanit'; }
+        
+        .extra-input-group { margin-top: 15px; text-align: left; padding: 10px; background: #f9f9f9; border-radius: 10px; }
+        .extra-input-group label { font-size: 0.8rem; display: block; margin-bottom: 5px; }
+        input[type="text"], input[type="number"] { width: 95%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: 'Kanit'; margin-bottom: 10px; }
+        .checkbox-group { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <div class="header-section">
         <h1>Ramadan 2025 🌙</h1>
-        <h5>By Winijnan</h5>
         <div class="progress-container"><div id="progress-bar"></div></div>
         <div style="font-size: 0.85rem; margin-bottom: 10px;">
             <span id="counter">สำเร็จ 0 วัน</span> | <span id="qada-text" style="color:#d9534f;">บวชชด: 0</span>
@@ -102,23 +107,36 @@
     <div id="choiceModal" class="modal">
         <div class="modal-content">
             <h3 id="modalTitle">วันที่...</h3>
-            <button class="action-btn btn-yes" onclick="confirmFasting(true)">✅ ถือศีลอด</button>
-            <button class="action-btn btn-no" onclick="confirmFasting(false)">❌ ไม่ได้ถือศีลอด</button>
-            <div id="reasonInput" style="display:none;">
-                <input type="text" id="reasonText" placeholder="เหตุผล (เช่น ประจำเดือน, ป่วย)">
-                <button class="action-btn" style="background:#5d7e83; color:white; margin-top:10px;" onclick="saveMissed()">บันทึก</button>
+            
+            <button class="action-btn btn-yes" onclick="showExtraInputs()">✅ ถือศีลอด</button>
+            
+            <div id="extraInputs" style="display:none;" class="extra-input-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="taraweehCheck">
+                    <label for="taraweehCheck">ละหมาดตารอเวียะห์ 🕌</label>
+                </div>
+                <label>อ่านอัลกุรอาน (จำนวนหน้า) 📖</label>
+                <input type="number" id="quranPages" placeholder="0" min="0">
+                <button class="action-btn" style="background:#4caf50; color:white;" onclick="confirmFasting(true)">บันทึกข้อมูล</button>
+            </div>
+
+            <button class="action-btn btn-no" onclick="showReasonInput()">❌ ไม่ได้ถือศีลอด</button>
+            <div id="reasonInput" style="display:none;" class="extra-input-group">
+                <label>เหตุผลที่ไม่ได้บวช</label>
+                <input type="text" id="reasonText" placeholder="เช่น ประจำเดือน, ป่วย">
+                <button class="action-btn" style="background:#d9534f; color:white;" onclick="confirmFasting(false)">บันทึก</button>
             </div>
         </div>
     </div>
 
     <script>
         const startDate = new Date('2025-02-18');
-        let ramadanData = JSON.parse(localStorage.getItem('ramadanDataV5')) || [];
+        let ramadanData = JSON.parse(localStorage.getItem('ramadanDataV6')) || [];
         let currentSelectingDay = null;
 
         function init() {
             if (ramadanData.length === 0) {
-                for(let i=1; i<=30; i++) ramadanData.push({ day: i, status: 'pending', reason: '' });
+                for(let i=1; i<=30; i++) ramadanData.push({ day: i, status: 'pending', reason: '', taraweeh: false, quran: 0 });
             }
             render();
         }
@@ -137,15 +155,19 @@
                 curDate.setDate(startDate.getDate() + (item.day - 1));
                 const dateStr = curDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
 
-                postIt.innerHTML = `<div class="day-num">${item.day}</div><div class="date-label">${dateStr}</div>`;
-                
-                if (item.status === 'missed') {
-                    postIt.innerHTML += `<div class="reason-tag">${item.reason || 'ไม่ได้บวช'}</div>`;
-                    qadaCount++;
-                } else if (item.status === 'success') {
+                let ibadahHtml = '';
+                if (item.status === 'success') {
                     finishedCount++;
+                    const icons = [];
+                    if (item.taraweeh) icons.push('🕌');
+                    if (item.quran > 0) icons.push(`📖 ${item.quran}`);
+                    if (icons.length > 0) ibadahHtml = `<div class="ibadah-icons">${icons.join(' ')}</div>`;
+                } else if (item.status === 'missed') {
+                    ibadahHtml = `<div class="reason-tag">${item.reason || 'ไม่ได้บวช'}</div>`;
+                    qadaCount++;
                 }
 
+                postIt.innerHTML = `<div class="day-num">${item.day}</div><div class="date-label">${dateStr}</div>${ibadahHtml}`;
                 postIt.onclick = () => handlePostItClick(item, curDate);
                 grid.appendChild(postIt);
             });
@@ -158,64 +180,68 @@
             document.getElementById('progress-bar').style.width = progress + '%';
 
             if (finishedCount + qadaCount === total && total > 0) launchCelebrate();
-
             document.getElementById('btn-remove').style.display = total > 30 ? 'block' : 'none';
-            localStorage.setItem('ramadanDataV5', JSON.stringify(ramadanData));
+            localStorage.setItem('ramadanDataV6', JSON.stringify(ramadanData));
         }
 
         function handlePostItClick(item, postItDate) {
             const today = new Date();
             today.setHours(0,0,0,0);
-            const checkDate = new Date(postItDate);
-            checkDate.setHours(0,0,0,0);
-
-            // 1. ดักวันที่: ห้ามกดล่วงหน้า
-            if (checkDate > today) {
+            if (postItDate > today) {
                 alert("อดใจรอนิดนึงจ้า ยังไม่ถึงวันที่ " + item.day + " เลย ❤️");
                 return;
             }
 
-            // 2. ระบบ Toggle: ถ้ามีสถานะอยู่แล้ว ให้ถามเพื่อล้างค่า (Undo)
             if (item.status !== 'pending') {
-                if (confirm(`คุณต้องการยกเลิกการบันทึกของวันที่ ${item.day} ใช่ไหม?`)) {
+                if (confirm(`ยกเลิกการบันทึกวันที่ ${item.day} ใช่ไหม?`)) {
                     const idx = ramadanData.findIndex(d => d.day === item.day);
                     ramadanData[idx].status = 'pending';
                     ramadanData[idx].reason = '';
+                    ramadanData[idx].taraweeh = false;
+                    ramadanData[idx].quran = 0;
                     render();
                 }
                 return;
             }
 
-            // 3. ถ้ายังไม่มีสถานะ ให้เปิด Modal เลือก
             currentSelectingDay = item.day;
             document.getElementById('modalTitle').innerText = `วันที่ ${item.day}`;
+            document.getElementById('extraInputs').style.display = 'none';
             document.getElementById('reasonInput').style.display = 'none';
             document.getElementById('choiceModal').style.display = 'flex';
+        }
+
+        function showExtraInputs() {
+            document.getElementById('extraInputs').style.display = 'block';
+            document.getElementById('reasonInput').style.display = 'none';
+        }
+
+        function showReasonInput() {
+            document.getElementById('reasonInput').style.display = 'block';
+            document.getElementById('extraInputs').style.display = 'none';
         }
 
         function confirmFasting(isSuccess) {
             const idx = ramadanData.findIndex(d => d.day === currentSelectingDay);
             if (isSuccess) {
-                alert("อัลฮัมดุลิลลาฮฺ เก่งมากที่อดทนผ่านไปได้ ❤️");
                 ramadanData[idx].status = 'success';
-                document.getElementById('choiceModal').style.display = 'none';
-                render();
+                ramadanData[idx].taraweeh = document.getElementById('taraweehCheck').checked;
+                ramadanData[idx].quran = parseInt(document.getElementById('quranPages').value) || 0;
             } else {
-                document.getElementById('reasonInput').style.display = 'block';
+                ramadanData[idx].status = 'missed';
+                ramadanData[idx].reason = document.getElementById('reasonText').value || 'ไม่ได้บวช';
             }
-        }
-
-        function saveMissed() {
-            const idx = ramadanData.findIndex(d => d.day === currentSelectingDay);
-            ramadanData[idx].status = 'missed';
-            ramadanData[idx].reason = document.getElementById('reasonText').value || 'ไม่ได้บวช';
+            
+            // ล้างค่าใน Input
+            document.getElementById('taraweehCheck').checked = false;
+            document.getElementById('quranPages').value = '';
             document.getElementById('reasonText').value = '';
             document.getElementById('choiceModal').style.display = 'none';
             render();
         }
 
         function addExtraDay() {
-            ramadanData.push({ day: ramadanData.length + 1, status: 'pending', reason: '' });
+            ramadanData.push({ day: ramadanData.length + 1, status: 'pending', reason: '', taraweeh: false, quran: 0 });
             render();
         }
 
@@ -228,14 +254,14 @@
 
         function resetData() {
             if(confirm("ล้างข้อมูลทั้งหมด?")) {
-                localStorage.removeItem('ramadanDataV5');
+                localStorage.removeItem('ramadanDataV6');
                 ramadanData = [];
                 init();
             }
         }
 
         function launchCelebrate() {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#4caf50', '#fffdf2', '#8da9ad'] });
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#4caf50', '#fffdf2'] });
         }
 
         window.onclick = (e) => { if (e.target == document.getElementById('choiceModal')) document.getElementById('choiceModal').style.display = "none"; }
